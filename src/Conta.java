@@ -1,52 +1,62 @@
+public abstract class Conta {
 
-public abstract class Conta implements IConta {
-	
-	private static final int AGENCIA_PADRAO = 1;
-	private static int SEQUENCIAL = 1;
+    protected static final int AGENCIA_PADRAO = 1;
+    private static int SEQUENCIAL = 1;
 
-	protected int agencia;
-	protected int numero;
-	protected double saldo;
-	protected Cliente cliente;
+    protected int agencia;
+    protected int numero;
+    protected double saldo; // <- ESSA LINHA É ESSENCIAL
 
-	public Conta(Cliente cliente) {
-		this.agencia = Conta.AGENCIA_PADRAO;
-		this.numero = SEQUENCIAL++;
-		this.cliente = cliente;
-	}
+    protected Cliente cliente;
 
-	@Override
-	public void sacar(double valor) {
-		saldo -= valor;
-	}
+    public Conta(Cliente cliente) {
+        this.agencia = AGENCIA_PADRAO;
+        this.numero = SEQUENCIAL++;
+        this.cliente = cliente;
+    }
 
-	@Override
-	public void depositar(double valor) {
-		saldo += valor;
-	}
+    public void sacar(double valor) {
+        if (valor <= 0) {
+            throw new ValorInvalidoException("Valor do saque deve ser maior que zero.");
+        }
+        if (saldo < valor) {
+            throw new SaldoInsuficienteException("Saldo insuficiente para saque.");
+        }
+        saldo -= valor;
+    }
 
-	@Override
-	public void transferir(double valor, IConta contaDestino) {
-		this.sacar(valor);
-		contaDestino.depositar(valor);
-	}
+    public void depositar(double valor) {
+        if (valor <= 0) {
+            throw new ValorInvalidoException("Valor do depósito deve ser maior que zero.");
+        }
+        saldo += valor;
+    }
 
-	public int getAgencia() {
-		return agencia;
-	}
+    public void transferir(double valor, Conta destino) {
+        if (valor <= 0) {
+            throw new ValorInvalidoException("Valor da transferência deve ser maior que zero.");
+        }
+        this.sacar(valor);
+        destino.depositar(valor);
+    }
 
-	public int getNumero() {
-		return numero;
-	}
+    public void imprimirExtrato() {
+        System.out.println("Titular: " + cliente.getNome());
+        System.out.println("Agência: " + agencia);
+        System.out.println("Número: " + numero);
+        System.out.printf("Saldo: %.2f%n", saldo);
+        System.out.println();
+    }
 
-	public double getSaldo() {
-		return saldo;
-	}
+    public int getAgencia() {
+        return agencia;
+    }
 
-	protected void imprimirInfosComuns() {
-		System.out.println(String.format("Titular: %s", this.cliente.getNome()));
-		System.out.println(String.format("Agencia: %d", this.agencia));
-		System.out.println(String.format("Numero: %d", this.numero));
-		System.out.println(String.format("Saldo: %.2f", this.saldo));
-	}
+    public int getNumero() {
+        return numero;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
 }
